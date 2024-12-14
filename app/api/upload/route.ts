@@ -13,12 +13,16 @@ export async function POST(req: NextRequest) {
     const text = await file.text();
     const parser = new DOMParser({
       locator: {},
-      errorHandler: { warning: () => {}, error: () => {}, fatalError: () => {} },
+      errorHandler: { warning: () => {}, error: () => {}, fatalError: () => {} }, // Suppress errors
     });
 
     const xmlDoc = parser.parseFromString(text, 'application/xml');
 
-    const result = xmlDoc.documentElement?.textContent || 'No content found';
+    if (!xmlDoc || !xmlDoc.documentElement) {
+      throw new Error('Invalid XML structure');
+    }
+
+    const result = xmlDoc.documentElement.textContent || 'No content found';
 
     return NextResponse.json({ result });
   } catch (error) {
